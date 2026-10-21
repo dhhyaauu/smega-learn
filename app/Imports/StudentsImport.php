@@ -11,48 +11,60 @@ use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
 class StudentsImport implements ToModel, WithHeadingRow, SkipsOnError, WithBatchInserts, WithChunkReading
 {
     use SkipsErrors;
 
-    // Proses 100 baris sekaligus agar tidak timeout untuk 1470 siswa
+    public int $importedCount = 0;
+    public int $skippedCount  = 0;
+
     public function batchSize(): int
     {
         return 100;
     }
 
-    // Baca file per 100 baris agar hemat memori
     public function chunkSize(): int
     {
         return 100;
     }
 
-    public function model(array $row)
+public function model(array $row): \Illuminate\Database\Eloquent\Model|array|null
     {
         // Skip baris kosong
         if (empty($row['nis']) || empty($row['email'])) {
             return null;
         }
 
-        // Skip jika email atau NIS sudah ada (mencegah duplikasi saat re-upload)
+        // Normalisasi: ambil no telepon dengan berbagai kemungkinan key
+        $noTelepon = $row['no_telepon']
+            ?? $row['no__telepon']
+            ?? $row['no_telepon_']
+            ?? $row['notelepon']
+            ?? null;
+
+        // Skip duplikat
         if (User::where('email', $row['email'])->exists()) {
+            $this->skippedCount++;
             return null;
         }
         if (Student::where('nis', (string) $row['nis'])->exists()) {
+            $this->skippedCount++;
             return null;
         }
 
-        // Buat akun user dulu
+        // Buat akun user
         $user = User::create([
             'name'      => $row['nama_lengkap'],
             'email'     => $row['email'],
-            'password'  => Hash::make((string) $row['nis']), // Password default = NIS
+            'password'  => Hash::make((string) $row['nis'], ['rounds' => 4]),
             'role'      => 'siswa',
             'is_active' => true,
         ]);
 
-        // Baru buat data siswa yang terhubung ke user
+        $this->importedCount++;
+
         return new Student([
             'user_id'       => $user->id,
             'nis'           => (string) $row['nis'],
@@ -62,7 +74,7 @@ class StudentsImport implements ToModel, WithHeadingRow, SkipsOnError, WithBatch
             'tingkat'       => $row['tingkat'],
             'jurusan'       => $row['jurusan'],
             'kelas'         => $row['kelas'],
-            'no_telepon'    => isset($row['no_telepon']) ? (string) $row['no_telepon'] : null,
+            'no_telepon'    => $noTelepon ? (string) $noTelepon : null,
         ]);
     }
 }
