@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\MasterDataController;
+use App\Http\Controllers\Admin\SchoolSettingController;
 use Illuminate\Support\Facades\Route;
 
 // Landing page (publik)
@@ -16,6 +17,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/master-data', [MasterDataController::class, 'index'])->name('master-data');
     Route::post('/import-excel', [MasterDataController::class, 'importExcel'])->name('import-excel');
     Route::get('/import-excel', fn() => redirect()->route('admin.master-data'))->name('import-excel.get');
+    Route::get('/settings', [SchoolSettingController::class, 'index'])->name('settings');
+    Route::post('/settings/location', [SchoolSettingController::class, 'updateLocation'])->name('settings.location');
+    Route::post('/settings/schedule', [SchoolSettingController::class, 'updateSchedule'])->name('settings.schedule');
 });
 
 // ============================================

@@ -16,7 +16,8 @@
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     @if(auth()->user()->role === 'admin')
-                        <x-nav-link :href="route('admin.master-data')" :active="request()->routeIs('admin.*')">Master Data</x-nav-link>
+                        <x-nav-link :href="route('admin.master-data')" :active="request()->routeIs('admin.master*')">Master Data</x-nav-link>
+                        <x-nav-link :href="route('admin.settings')" :active="request()->routeIs('admin.settings*')">Pengaturan</x-nav-link>
                     @elseif(auth()->user()->role === 'guru_bk')
                         <x-nav-link :href="route('bk.dashboard')" :active="request()->routeIs('bk.*')">Dashboard BK</x-nav-link>
                     @else
