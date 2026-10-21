@@ -43,6 +43,14 @@ Route::get('/bk/tren-kehadiran', function () {
     return view('bk.tren-kehadiran');
 })->name('bk.tren-kehadiran');
 
+Route::get('/bk/tindak-lanjut', function () {
+    return view('bk.tindak-lanjut');
+})->name('bk.tindak-lanjut');
+
+Route::get('/bk/laporan', function () {
+    return view('bk.laporan');
+})->name('bk.laporan');
+
 // ============================================
 // ROUTE SISWA
 // ============================================
