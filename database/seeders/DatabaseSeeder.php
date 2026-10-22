@@ -12,6 +12,8 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             SchoolSettingsSeeder::class,
             AttendanceScheduleSeeder::class,
+            ClassroomSeeder::class,
+            StudentSeeder::class,
         ]);
     }
 }

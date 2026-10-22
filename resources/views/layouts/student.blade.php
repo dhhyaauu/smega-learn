@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1d4ed8">
     <title>@yield('title', 'Beranda') — SMEGA Learn</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -33,16 +34,41 @@
                 @auth
                     <div class="text-right">
                         <p class="text-sm font-semibold leading-none text-slate-800">{{ Auth::user()->name }}</p>
-                        {{-- Nama kelas akan tersedia setelah relasi Student dibuat oleh Orang 4 --}}
                         <p class="mt-0.5 text-xs leading-none text-slate-500">
                             {{ Auth::user()->student->classroom->name ?? 'Siswa' }}
                         </p>
                     </div>
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    {{-- Avatar + dropdown logout --}}
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" @click.outside="open = false"
+                                class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100
+                                       text-sm font-bold text-blue-700 transition hover:bg-blue-200">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        </button>
+                        <div x-show="open" x-transition
+                             class="absolute right-0 top-10 z-50 w-44 rounded-xl bg-white py-1
+                                    shadow-lg ring-1 ring-slate-200">
+                            <div class="border-b border-slate-100 px-4 py-2">
+                                <p class="truncate text-sm font-semibold text-slate-800">{{ Auth::user()->name }}</p>
+                                <p class="truncate text-xs text-slate-500">{{ Auth::user()->email }}</p>
+                            </div>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit"
+                                        class="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-600
+                                               transition hover:bg-red-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                         stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                        <polyline points="16 17 21 12 16 7"/>
+                                        <line x1="21" y1="12" x2="9" y2="12"/>
+                                    </svg>
+                                    Keluar
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 @else
-                    {{-- Placeholder saat auth belum tersedia (development) --}}
                     <div class="text-right">
                         <p class="text-sm font-semibold leading-none text-slate-800">Siswa</p>
                         <p class="mt-0.5 text-xs leading-none text-slate-500">Belum login</p>
@@ -196,5 +222,6 @@
         </div>
     </nav>
 
+    @stack('scripts')
 </body>
 </html>

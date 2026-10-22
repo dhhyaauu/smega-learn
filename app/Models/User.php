@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -34,9 +35,15 @@ class User extends Authenticatable
         ];
     }
 
-    public function student()
+    public function student(): HasOne
     {
         return $this->hasOne(Student::class);
+    }
+
+    /** Apakah user ini adalah siswa aktif (punya data student). */
+    public function isStudent(): bool
+    {
+        return $this->student()->exists();
     }
 
     public function isAdmin(): bool
@@ -44,7 +51,14 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    /** Alias sesuai konvensi tim (guru_bk). */
     public function isGuruBK(): bool
+    {
+        return $this->role === 'guru_bk';
+    }
+
+    /** Alias tambahan untuk konsistensi. */
+    public function isGuruBk(): bool
     {
         return $this->role === 'guru_bk';
     }
